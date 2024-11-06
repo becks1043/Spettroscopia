@@ -20,7 +20,7 @@ with open(data_name, 'r' , encoding='utf-8', errors= 'replace') as file:
             #righe_str.append(numero)
             continue
 
-data = data[: -6]
+data = data[: -5]
 print(f'La shape del tensore dei dati è {np.shape(data)}, il numero dei canali è {np.shape(data)[0]}') #occhio alle tuple!
 #print('stringhe', righe_str)
 
