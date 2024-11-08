@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from scipy.optimize import curve_fit
 
 data_name= "Cs137.Spe"
 #diamo una struttura dati al nostro file di acquisizione
@@ -33,7 +34,7 @@ plt.plot(x ,data, color='green')
 plt.show()
  
 print("--------")
-#eliminiamo il segnale di backgrouncontinuum dai dati
+#eliminiamo il segnale di continuum dai dati
 
 a = 774  #conteggi canale A
 b = 979 #conteggi canale B
@@ -45,12 +46,41 @@ ch_b = data[b]
 def continum(ch_a, ch_b):
     return (ch_a + ch_b)*N_ch/2
 
-span = data[a : b]
-def AreaPicco(data):
-    return sum(span) - continum(ch_a, ch_b)
+y_data = data[a : b]
+def AreaPicco(y_data):
+    return sum(y_data) - continum(ch_a, ch_b)
 
 print(f"Questa è la stima dell'area del continum {continum(ch_a, ch_b)} \nQuesta della neat area {AreaPicco(data)}")
 
-z = np.linspace(a, b, len(span))
-plt.plot(z ,span, color='blue')
+channels = np.linspace(a, b, len(y_data))
+plt.plot(channels ,y_data, color='blue')
+plt.show()
+#funzione di fit gaussiana
+
+def Gaussian(x,a,b,sigma):
+    return a*np.exp(-(x-b)**2/(2*(sigma**2)))
+
+#fit e test del chi quadro
+popt, pcov = curve_fit(Gaussian, channels, y_data, p0 = [10, 800, 150])
+a_fit, b_fit , sigma_fit = popt
+
+y_fit = Gaussian(channels, *popt)
+residuals = y_data - y_fit
+chi_square = np.sum((residuals ** 2)/380) #va diviso per gli errori 
+dof = len(channels) - len(popt)
+chi_norm = chi_square / dof
+
+print("---------")
+print(f"il chi2 è {chi_square} \nil chi normalizzato è {chi_norm}")
+print("---------")
+
+#plot del fit
+
+plt.figure(figsize = (10,6))
+plt.scatter(channels, y_data, label = "dati", color="purple", s=4)
+plt.plot(channels, y_fit, label = "fit",color="red")
+plt.xlabel("canali")
+plt.ylabel("numero di eventi")
+plt.legend()
+plt.title(f"fit gaussiano per il picco del Cs137 ")
 plt.show()
