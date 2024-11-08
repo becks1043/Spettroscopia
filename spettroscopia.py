@@ -53,8 +53,13 @@ def AreaPicco(y_data):
 print(f"Questa è la stima dell'area del continum {continum(ch_a, ch_b)} \nQuesta della neat area {AreaPicco(data)}")
 
 channels = np.linspace(a, b, len(y_data))
-plt.plot(channels ,y_data, color='blue')
-plt.show()
+#plt.plot(channels ,y_data, color='blue')
+#plt.show()
+
+#statistica poissoniana per ogni bin
+y_err = np.sqrt(y_data)
+y_err[y_err == 0] = 1
+
 #funzione di fit gaussiana
 
 def Gaussian(x,a,b,sigma):
@@ -66,7 +71,9 @@ a_fit, b_fit , sigma_fit = popt
 
 y_fit = Gaussian(channels, *popt)
 residuals = y_data - y_fit
-chi_square = np.sum((residuals ** 2)/380) #va diviso per gli errori 
+for i in range(len(y_data)):
+    chi_square = np.sum((residuals[i]/y_err[i])**2) #va diviso per gli errori 
+
 dof = len(channels) - len(popt)
 chi_norm = chi_square / dof
 
