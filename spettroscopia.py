@@ -31,6 +31,9 @@ bins = np.shape(data)[0]
 
 x = np.linspace(0, bins, bins)
 plt.plot(x ,data, color='green')
+plt.xlabel("Canali")
+plt.ylabel("Numero di eventi")
+plt.xlim(0, 2048)
 plt.show()
  
 print("--------")
@@ -53,34 +56,48 @@ def AreaPicco(y_data):
 print(f"Questa è la stima dell'area del continum {continum(ch_a, ch_b)} \nQuesta della neat area {AreaPicco(data)}")
 
 channels = np.linspace(a, b, len(y_data))
-plt.plot(channels ,y_data, color='blue')
-plt.show()
+#plt.plot(channels ,y_data, color='blue')
+#plt.show()
+
+#statistica poissoniana per ogni bin
+y_err = np.sqrt(y_data)
+y_err[y_err == 0] = 1
+
 #funzione di fit gaussiana
 
 def Gaussian(x,a,b,sigma):
     return a*np.exp(-(x-b)**2/(2*(sigma**2)))
 
 #fit e test del chi quadro
-popt, pcov = curve_fit(Gaussian, channels, y_data, p0 = [10, 800, 150])
+popt, pcov = curve_fit(Gaussian, channels, y_data, p0 = [10, 800, 150],bounds=([0, -np.inf, 0], [np.inf, np.inf, np.inf]))
 a_fit, b_fit , sigma_fit = popt
 
 y_fit = Gaussian(channels, *popt)
 residuals = y_data - y_fit
-chi_square = np.sum((residuals ** 2)/380) #va diviso per gli errori 
+for i in range(len(y_data)):
+    chi_square = np.sum((residuals[i]/y_err[i])**2) #va diviso per gli errori 
+
 dof = len(channels) - len(popt)
 chi_norm = chi_square / dof
 
 print("---------")
+print(f"Parametri del fit {popt}")
 print(f"il chi2 è {chi_square} \nil chi normalizzato è {chi_norm}")
 print("---------")
+
+#troviamo il picco e stimiamo l'errore
+peak_position = b_fit
+delta_peak_position = sigma_fit/ np.sqrt(AreaPicco(y_data))
+print(f"La posizione del picco è {peak_position} +/- {delta_peak_position} \n---------")
 
 #plot del fit
 
 plt.figure(figsize = (10,6))
+plt.grid()
 plt.scatter(channels, y_data, label = "dati", color="purple", s=4)
 plt.plot(channels, y_fit, label = "fit",color="red")
-plt.xlabel("canali")
-plt.ylabel("numero di eventi")
+plt.xlabel("Canali")
+plt.ylabel("Numero di eventi")
 plt.legend()
-plt.title(f"fit gaussiano per il picco del Cs137 ")
+plt.title(f"Fit gaussiano per il picco del Cs137 ")
 plt.show()
