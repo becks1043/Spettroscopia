@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 
-data_name = "Cs137.Spe"
+data_name = "Na22.Spe"
 background_name = "fondo.Spe"
 #diamo una struttura dati al nostro file di acquisizione
 data = []
@@ -48,8 +48,8 @@ plt.show()
 print("--------")
 #eliminiamo il segnale di continuum dai dati
 
-a = 774  #conteggi canale A
-b = 979 #conteggi canale B
+a = 630 #conteggi canale A
+b = 730 #conteggi canale B
 N_ch = b - a #conteggi fra A e B
 
 ch_a = data[a]
@@ -75,12 +75,16 @@ y_err[y_err == 0] = 1
 def linear_background(x,a,b):
     return a*x + b
 
-range_linear = data[360:670]
-x_range = np.linspace(360,670,len(range_linear))
+a1 = 250
+b1 = 500
+range_linear = data[a1:b1]
+x_range = np.linspace(a1,b1,len(range_linear))
 popt, pcov = curve_fit(linear_background,x_range ,range_linear)
 data = [float(x) for x in data]
 background_fit = linear_background(x, *popt)
-y_data -= background_fit[a : b]
+y_data -= background_fit[a : b] 
+
+plt.scatter(channels, y_data)
 
 #funzione di fit gaussiana
 
@@ -119,5 +123,5 @@ plt.plot(channels, y_fit, label = "fit",color="red")
 plt.xlabel("Canali")
 plt.ylabel("Numero di eventi")
 plt.legend()
-plt.title(f"Fit gaussiano per il picco del Cs137 ")
+plt.title(f"Fit gaussiano per il picco del {data_name} ")
 plt.show()
