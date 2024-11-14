@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 
-data_name = "Na22.Spe"
+data_name = "Co60.Spe"
 background_name = "fondo.Spe"
 #diamo una struttura dati al nostro file di acquisizione
 data = []
@@ -36,7 +36,6 @@ print(f'La shape del tensore dei dati è {np.shape(data)}, il numero dei canali 
 #creiamo l'istogramma
 bins = np.shape(data)[0]
 #plt.hist(data, bins, edgecolor='blue', facecolor='none')
-
 x = np.linspace(0, bins, bins)
 plt.plot(x ,data, color='green')
 plt.xlabel("Canali")
@@ -44,12 +43,11 @@ plt.ylabel("Numero di eventi")
 plt.xlim(0, 2048)
 plt.ylim(0,)
 plt.show()
- 
 print("--------")
 #eliminiamo il segnale di continuum dai dati
 
-a = 630 #conteggi canale A
-b = 730 #conteggi canale B
+a = 1400 #conteggi canale A
+b = 1590 #conteggi canale B
 N_ch = b - a #conteggi fra A e B
 
 ch_a = data[a]
@@ -75,16 +73,16 @@ y_err[y_err == 0] = 1
 def linear_background(x,a,b):
     return a*x + b
 
-a1 = 250
-b1 = 500
-range_linear = data[a1:b1]
-x_range = np.linspace(a1,b1,len(range_linear))
-popt, pcov = curve_fit(linear_background,x_range ,range_linear)
+
+range_linear = data[a-10:a] + data[b:b+10]
+#x_range = list(range(a-10,10)) + list(range(b, b+10))
+x_range = np.linspace(a-10, b+10, len(range_linear))
+popt1, pcov = curve_fit(linear_background, x_range , range_linear)
 data = [float(x) for x in data]
-background_fit = linear_background(x, *popt)
+background_fit = linear_background(x, *popt1)
 y_data -= background_fit[a : b] 
 
-plt.scatter(channels, y_data)
+
 
 #funzione di fit gaussiana
 
@@ -114,6 +112,9 @@ delta_peak_position = sigma_fit/ np.sqrt(AreaPicco(y_data))
 print(f"La posizione del picco è {peak_position} +/- {delta_peak_position} \n---------")
 
 #plot del fit
+
+
+plt.scatter(channels, y_data)
 
 plt.figure(figsize = (10,6))
 plt.grid()
