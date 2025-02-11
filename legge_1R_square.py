@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
-from PROGETTO_SPETTROSCOPIA import DataLoader
+from PROGETTO_classe import DataLoader
 
 file_names = ['Cs137_135mm.Spe', 'Cs137_195mm.Spe', 'Cs137_255mm.Spe', 'Cs137_314mm.Spe', 'Cs137_375mm.Spe']
 
